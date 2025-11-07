@@ -1,6 +1,6 @@
 # Metasequoia IME TSF(水杉输入法 TSF 端)
 
-This is TSF end of [MetaIME](https://github.com/fanlumaster/MetaIME).
+This is TSF end of [MetasequoiaIME](https://github.com/fanlumaster/MetasequoiaIME).
 
 Notice: now only support 64-bit Apps.
 
