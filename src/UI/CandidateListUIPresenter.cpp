@@ -42,7 +42,9 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
     DWORD_PTR candidateLen = keystrokeBufLen;
     CStringRange candidateString(keyStrokebuffer);
 
+#ifdef FANY_DEBUG
     OutputDebugString(fmt::format(L"create_word, keystrokeBuffer: {}", keyStrokebuffer.ToWString()).c_str());
+#endif
 
     // _pCandidateListUIPresenter would be null in uwp/metro apps
     if (nullptr == _pCandidateListUIPresenter)
@@ -60,7 +62,9 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
         else if (receivedData->msg_type == Global::DataFromServerMsgType::Normal) // 只有正常情况下才会上屏
         {
             GlobalIme::word_for_creating_word = L"";
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"create_word, normal???").c_str());
+#endif
             candidateString.Set(receivedData->candidate_string, wcslen(receivedData->candidate_string));
             hr = _AddComposingAndChar(ec, pContext, &candidateString);
             if (FAILED(hr))
@@ -85,8 +89,10 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                 /* pureFullPinyin 一直都是最初的那个完整的拼音 */
                 std::wstring pureFullPinyin = data.substr(0, data.find(L','));
                 std::wstring curWord = data.substr(data.find(L',') + 1);
+#ifdef FANY_DEBUG
                 OutputDebugString(
                     fmt::format(L"create_word, pureFullPinyin: {}, curWord: {}\n", pureFullPinyin, curWord).c_str());
+#endif
                 GlobalIme::word_for_creating_word = curWord;
                 CCompositionProcessorEngine *pCompositionProcessorEngine = nullptr;
                 pCompositionProcessorEngine = _pCompositionProcessorEngine;
@@ -121,8 +127,10 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
                     _HandleCancel(ec, pContext);
                 }
             }
+#ifdef FANY_DEBUG
             OutputDebugString(
                 fmt::format(L"create_word: current word part {}\n", GlobalIme::word_for_creating_word).c_str());
+#endif
             return hr;
         }
     }
@@ -276,7 +284,9 @@ HRESULT CMetasequoiaIME::_HandleCandidateWorker(TfEditCookie ec, _In_ ITfContext
         OutputDebugString(fmt::format(L"Fany here candidateString = {}", candidateString.Get()).c_str());
 #endif
 
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"Create word here?").c_str());
+#endif
 
         // Add composing character
         hrReturn = _AddComposingAndChar(ec, pContext, &candidateString);
@@ -910,7 +920,9 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     hr = MakeCandidateWindow(pContextDocument, wndWidth);
     if (FAILED(hr))
     {
+#ifdef FANY_DEBUG
         OutputDebugString(L"MakeCandidateWindow failed\n");
+#endif
         // goto Exit;
     }
 

@@ -449,8 +449,9 @@ void SendToNamedpipe()
         );
         if (hFromServerPipe == INVALID_HANDLE_VALUE)
         {
-            // TODO: Log
+#ifdef FANY_DEBUG
             OutputDebugString(L"Create hFromServerPipe failed\n");
+#endif
         }
         else
         {
@@ -583,12 +584,16 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
     int waited = 0;
     while (waited < timeoutMs)
     {
-        // TODO: Do not log
+// TODO: Do not log
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"current waited: {}", waited).c_str());
+#endif
         if (PeekNamedPipe(hFromServerPipe, nullptr, 0, nullptr, &bytesAvailable, nullptr) && bytesAvailable > 0)
         {
             auto ret = ReadDataFromServerViaNamedPipe();
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"PeekNamedPipe: {}", waited).c_str());
+#endif
             return ret;
         }
         Sleep(intervalMs); // TODO: Maybe could use less time
@@ -649,7 +654,9 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
     }
     else
     {
+#ifdef FANY_DEBUG
         OutputDebugString(namedpipeDataFromServer.candidate_string);
+#endif
         return &namedpipeDataFromServer;
     }
 

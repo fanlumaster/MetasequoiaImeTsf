@@ -226,7 +226,9 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     _tfClientId = tfClientId;
     _dwActivateFlags = dwFlags;
 
+#ifdef FANY_DEBUG
     OutputDebugString(L"CMetasequoiaIME::ActivateEx\n");
+#endif
     /*
     std::wstring processName = FanyUtils::GetCurrentProcessName();
     if (Global::VSCodeSeries.find(processName) != Global::VSCodeSeries.end())
@@ -308,7 +310,9 @@ STDAPI CMetasequoiaIME::Deactivate()
     // Clean IPC
     CloseIpc();
 
+#ifdef FANY_DEBUG
     OutputDebugString(L"CMetasequoiaIME::Deactivate\n");
+#endif
 
     if (_pCompositionProcessorEngine)
     {
