@@ -5,6 +5,7 @@
       "name": "for64",
       "inherits": "vcpkg",
       "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
       "binaryDir": "${sourceDir}/build64",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-windows"
@@ -14,6 +15,7 @@
       "name": "for32",
       "inherits": "vcpkg",
       "generator": "Visual Studio 17 2022",
+      "architecture": "Win32",
       "binaryDir": "${sourceDir}/build32",
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x86-windows"
