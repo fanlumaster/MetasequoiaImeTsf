@@ -931,8 +931,8 @@ HRESULT CCandidateListUIPresenter::_StartCandidateList(TfClientId tfClientId, _I
     RECT rcTextExt;
     if (SUCCEEDED(_GetTextExt(&rcTextExt)))
     {
-        Global::Point[0] = rcTextExt.left;
-        Global::Point[1] = rcTextExt.bottom;
+        Global::Point[0] = rcTextExt.left * Global::DpiScale;
+        Global::Point[1] = rcTextExt.bottom * Global::DpiScale;
         _LayoutChangeNotification(&rcTextExt);
     }
 

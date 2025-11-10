@@ -198,6 +198,16 @@ HRESULT CTfTextLayoutSink::_UnadviseTextLayoutSink()
     return hr;
 }
 
+/**
+ * @brief 获取 caret 的坐标
+ *
+ * 本质上是通过 _pContextView->GetTextExt 获取 caret 坐标，
+ * 因此，涉及到 caret 坐标的地方不止这里，还有其他地方，是直接
+ * 使用 _pContextView->GetTextExt 来获取坐标的。
+ *
+ * @param lpRect
+ * @return HRESULT
+ */
 HRESULT CTfTextLayoutSink::_GetTextExt(_Out_ RECT *lpRect)
 {
     HRESULT hr = S_OK;

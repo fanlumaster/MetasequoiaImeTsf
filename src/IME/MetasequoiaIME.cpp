@@ -9,11 +9,14 @@
 #include <winnt.h>
 #include <winuser.h>
 #include <Windows.h>
+#include <shellscalingapi.h>
 #include "FanyLog.h"
 #include "Ipc.h"
 #include "CommonUtils.h"
 #include "Global/FanyDefines.h"
 #include "Utils/FanyUtils.h"
+
+#pragma comment(lib, "Shcore.lib")
 
 //+---------------------------------------------------------------------------
 //
@@ -287,6 +290,26 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     _pCompositionProcessorEngine->InitializeMetasequoiaIMECompartment(pThreadMgr, tfClientId);
 
     // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
+    HWND hwndTarget = GetFocus();
+    DPI_AWARENESS awareness = GetAwarenessFromDpiAwarenessContext(GetWindowDpiAwarenessContext(hwndTarget));
+
+    if (awareness == DPI_AWARENESS_UNAWARE)
+    {
+#ifdef FANY_DEBUG
+        OutputDebugString(fmt::format(L"awareness == DPI_AWARENESS_UNAWARE").c_str());
+#endif
+        /* 宿主是非感知程序，需要反向缩放 */
+        DPI_AWARENESS_CONTEXT oldCtx = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+        HMONITOR hMon = MonitorFromWindow(hwndTarget, MONITOR_DEFAULTTONEAREST);
+        UINT dpiX = 96, dpiY = 96;
+        GetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+        SetThreadDpiAwarenessContext(oldCtx);
+        Global::DpiScale = dpiX / 96.0;
+#ifdef FANY_DEBUG
+        OutputDebugString(fmt::format(L"Global::DpiScale: {}", Global::DpiScale).c_str());
+#endif
+    }
 
 #ifdef FANY_DEBUG
     OutputDebugString(L"CMetasequoiaIME::ActivateEx\n");
