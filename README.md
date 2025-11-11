@@ -2,8 +2,6 @@
 
 This is TSF end of [MetasequoiaIME](https://github.com/fanlumaster/MetasequoiaIME).
 
-Notice: now only support 64-bit Apps.
-
 ## How to build
 
 ### Prerequisites
@@ -33,10 +31,11 @@ cd MetasequoiaImeTsf
 python .\scripts\prepare_env.py
 ```
 
-Then, build,
+Then, build both 64-bit and 32-bit dll files,
 
 ```powershell
-.\scripts\lcompile.ps1
+.\scripts\lcompile.ps1 64
+.\scripts\lcompile.ps1 32
 ```
 
 ### Install
@@ -45,11 +44,12 @@ Launch powershell as administrator, make sure you turn on the system `Enable sud
 
 ![](https://i.postimg.cc/zJCn9Cnn/image.png)
 
-Then, create a folder in `C:\Program Files\` named `MetasequoiaImeTsf`, and copy the `MetasequoiaImeTsf.dll` to it,
+Then, create a folder in `C:\Program Files\` named `MetasequoiaImeTsf`, and copy the 64-bit version `MetasequoiaImeTsf.dll` to it, alse create a folder in `C:\Program Files (x86)\` named `MetasequoiaImeTsf`, and copy the 32-bit version `MetasequoiaImeTsf.dll` to it.
 
 ```powershell
 gsudo
 Copy-Item -Path ".\build64\Debug\MetasequoiaImeTsf.dll" -Destination "C:\Program Files\MetasequoiaImeTsf"
+Copy-Item -Path ".\build32\Debug\MetasequoiaImeTsf.dll" -Destination "C:\Program Files (x86)\MetasequoiaImeTsf"
 ```
 
 Then, install it,
@@ -57,12 +57,16 @@ Then, install it,
 ```powershell
 cd "C:\Program Files\MetasequoiaImeTsf"
 sudo regsvr32 .\MetasequoiaImeTsf.dll
+cd "C:\Program Files (x86)\MetasequoiaImeTsf"
+sudo regsvr32 .\MetasequoiaImeTsf.dll
 ```
 
 ### Uninstall
 
 ```powershell
 cd "C:\Program Files\MetasequoiaImeTsf"
+sudo regsvr32 /u .\MetasequoiaImeTsf.dll
+cd "C:\Program Files (x86)\MetasequoiaImeTsf"
 sudo regsvr32 /u .\MetasequoiaImeTsf.dll
 ```
 
