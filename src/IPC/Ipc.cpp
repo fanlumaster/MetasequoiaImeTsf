@@ -436,29 +436,6 @@ void SendToNamedpipe()
         }
     }
 
-    if (!hFromServerPipe || hFromServerPipe == INVALID_HANDLE_VALUE) // Try to reconnect
-    {
-        hFromServerPipe = CreateFile(     //
-            FANY_IME_TO_TSF_NAMED_PIPE,   //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
-        if (hFromServerPipe == INVALID_HANDLE_VALUE)
-        {
-#ifdef FANY_DEBUG
-            OutputDebugString(L"Create hFromServerPipe failed\n");
-#endif
-        }
-        else
-        {
-            // TODO: Log
-        }
-    }
-
     DWORD bytesWritten = 0;
     BOOL ret = WriteFile(      //
         hPipe,                 //
@@ -469,7 +446,14 @@ void SendToNamedpipe()
     );
     if (!ret || bytesWritten != sizeof(namedpipeData))
     {
-        // TODO: Error handling
+        /* Error handling: 必须将 hPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
+        DWORD err = GetLastError();
+        if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
+        {
+            CloseHandle(hPipe);
+            hPipe = INVALID_HANDLE_VALUE;
+        }
+        return;
     }
 }
 
@@ -599,6 +583,10 @@ struct FanyImeNamedpipeDataToTsf *TryReadDataFromServerPipeWithTimeout()
         Sleep(intervalMs); // TODO: Maybe could use less time
         waited += intervalMs;
     }
+
+    /* Error handling: 必须将 hFromServerPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
+    CloseHandle(hFromServerPipe);
+    hFromServerPipe = INVALID_HANDLE_VALUE;
 
     namedpipeDataFromServer.msg_type = Global::DataFromServerMsgType::Normal;
     // Pipe timeout error

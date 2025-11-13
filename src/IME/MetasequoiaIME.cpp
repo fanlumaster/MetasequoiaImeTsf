@@ -241,6 +241,8 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     */
     // Set up IPC(named pipe)
     InitIpc();
+    // TODO: 去掉共享内存，只保留命名管道
+    // InitNamedpipe();
 
     Global::current_process_name = GetCurrentProcessName();
 
@@ -332,6 +334,8 @@ STDAPI CMetasequoiaIME::Deactivate()
 {
     // Clean IPC
     CloseIpc();
+    // TODO: 去掉共享内存，只保留命名管道
+    // CloseNamedpipe();
 
 #ifdef FANY_DEBUG
     OutputDebugString(L"CMetasequoiaIME::Deactivate\n");
