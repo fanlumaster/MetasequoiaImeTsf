@@ -451,8 +451,50 @@ void SendToNamedpipe()
         if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
         {
             CloseHandle(hPipe);
+            /* 将两个方向的管道同时置为无效 */
             hPipe = INVALID_HANDLE_VALUE;
+            hFromServerPipe = INVALID_HANDLE_VALUE;
+            /* 向 Server 端发送 kill 同时重置两个管道的 connect */
+            SendToAuxNamedpipe(L"kill");
         }
+
+        //
+        // 再重连一次
+        //
+        hPipe = CreateFile(               //
+            FANY_IME_NAMED_PIPE,          //
+            GENERIC_READ | GENERIC_WRITE, //
+            0,                            //
+            nullptr,                      //
+            OPEN_EXISTING,                //
+            0,                            //
+            nullptr                       //
+        );
+
+        if (hPipe == INVALID_HANDLE_VALUE)
+        {
+            // TODO: Log
+            return;
+        }
+        else
+        {
+            // TODO: Log
+        }
+
+        DWORD bytesWritten = 0;
+        BOOL ret = WriteFile(      //
+            hPipe,                 //
+            &namedpipeData,        //
+            sizeof(namedpipeData), //
+            &bytesWritten,         //
+            NULL                   //
+        );
+
+        if (!ret || bytesWritten != sizeof(namedpipeData))
+        {
+            // TODO: Error handling
+        }
+
         return;
     }
 }
@@ -653,6 +695,11 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
     return &namedpipeDataFromServer;
 }
 
+/**
+ * @brief 即用即断，不要求一直连接，但是，要让 Server 端的管道一直在 connect 状态阻塞住等待连接
+ *
+ * @param pipeData
+ */
 void SendToAuxNamedpipe(std::wstring pipeData)
 {
     HANDLE hAuxPipe = CreateFileW(    //
@@ -666,7 +713,9 @@ void SendToAuxNamedpipe(std::wstring pipeData)
     );
     if (!hAuxPipe || hAuxPipe == INVALID_HANDLE_VALUE)
     {
-        // TODO: Error handling
+#ifdef FANY_DEBUG
+        OutputDebugString(fmt::format(L"SendToAuxNamedpipe: PipeOpenError").c_str());
+#endif
         return;
     }
     DWORD bytesWritten = 0;
