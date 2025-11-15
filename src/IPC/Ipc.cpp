@@ -450,8 +450,9 @@ void SendToNamedpipe()
         DWORD err = GetLastError();
         if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
         {
-            CloseHandle(hPipe);
             /* 将两个方向的管道同时置为无效 */
+            CloseHandle(hPipe);
+            CloseHandle(hFromServerPipe);
             hPipe = INVALID_HANDLE_VALUE;
             hFromServerPipe = INVALID_HANDLE_VALUE;
             /* 向 Server 端发送 kill 同时重置两个管道的 connect */
@@ -459,17 +460,23 @@ void SendToNamedpipe()
         }
 
         //
-        // 再重连一次
+        // 等待 Server 准备好，再重连几次
         //
-        hPipe = CreateFile(               //
-            FANY_IME_NAMED_PIPE,          //
-            GENERIC_READ | GENERIC_WRITE, //
-            0,                            //
-            nullptr,                      //
-            OPEN_EXISTING,                //
-            0,                            //
-            nullptr                       //
-        );
+        for (int i = 0; i < 10; ++i)
+        {
+            Sleep(10);
+            hPipe = CreateFile(               //
+                FANY_IME_NAMED_PIPE,          //
+                GENERIC_READ | GENERIC_WRITE, //
+                0,                            //
+                nullptr,                      //
+                OPEN_EXISTING,                //
+                0,                            //
+                nullptr                       //
+            );
+            if (hPipe != INVALID_HANDLE_VALUE)
+                break;
+        }
 
         if (hPipe == INVALID_HANDLE_VALUE)
         {
