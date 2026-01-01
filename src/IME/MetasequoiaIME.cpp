@@ -291,6 +291,9 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     // Reset to Chinese mode whenever switch back to this IME
     _pCompositionProcessorEngine->InitializeMetasequoiaIMECompartment(pThreadMgr, tfClientId);
 
+    // 激活此输入法时，向 server 端发送一个激活的消息
+    SendIMEActivationEventToUIProcessViaNamedPipe();
+
     // SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
     HWND hwndTarget = GetFocus();
@@ -332,6 +335,9 @@ ExitError:
 
 STDAPI CMetasequoiaIME::Deactivate()
 {
+    // 注销此输入法时，向 server 端发送一个注销的消息
+    SendIMEDeactivationEventToUIProcessViaNamedPipe();
+
     // Clean IPC
     CloseIpc();
     // TODO: 去掉共享内存，只保留命名管道

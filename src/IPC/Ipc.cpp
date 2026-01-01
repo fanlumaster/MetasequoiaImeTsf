@@ -791,3 +791,19 @@ int SendLangbarRightClickEventToUIProcessViaNamedPipe(const RECT *prcArea)
 
     return 0;
 }
+
+int SendIMEActivationEventToUIProcessViaNamedPipe()
+{
+    namedpipeData.event_type = 5;
+    SendToNamedpipe();
+
+    return 0;
+}
+
+int SendIMEDeactivationEventToUIProcessViaNamedPipe()
+{
+    namedpipeData.event_type = 6;
+    SendToNamedpipe();
+
+    return 0;
+}

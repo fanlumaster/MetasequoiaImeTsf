@@ -95,6 +95,8 @@ int SendHideCandidateWndEventToUIProcess();
 int SendShowCandidateWndEventToUIProcess();
 int SendMoveCandidateWndEventToUIProcess();
 int SendLangbarRightClickEventToUIProcess(const RECT *prcArea);
+int SendIMEActivationEventToUIProcessViaNamedPipe();
+int SendIMEDeactivationEventToUIProcessViaNamedPipe();
 
 //
 // For named pipe
