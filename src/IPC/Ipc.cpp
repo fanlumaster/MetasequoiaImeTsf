@@ -807,3 +807,13 @@ int SendIMEDeactivationEventToUIProcessViaNamedPipe()
 
     return 0;
 }
+
+int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus)
+{
+    namedpipeData.event_type = 7;
+    /* 利用其他的字段，把 IME 的中英状态传递过去 */
+    namedpipeData.keycode = uImeStatus;
+    SendToNamedpipe();
+
+    return 0;
+}

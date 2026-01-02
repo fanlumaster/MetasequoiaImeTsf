@@ -903,13 +903,21 @@ void CCompositionProcessorEngine::OnPreservedKey( //
         BOOL isOpen = FALSE;
         CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
         CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
-        CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen ? FALSE : TRUE);
+        isOpen = isOpen ? FALSE : TRUE;
+        CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen);
 
         // Also toggle punctuation mode
         BOOL isPunctuation = FALSE;
         CCompartment CompartmentPunctuation(pThreadMgr, tfClientId, Global::MetasequoiaIMEGuidCompartmentPunctuation);
         CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
-        CompartmentPunctuation._SetCompartmentBOOL(isPunctuation ? FALSE : TRUE);
+        if (!isOpen && isPunctuation)
+        {
+            CompartmentPunctuation._SetCompartmentBOOL(FALSE);
+        }
+        else if (isOpen && !isPunctuation)
+        {
+            CompartmentPunctuation._SetCompartmentBOOL(TRUE);
+        }
 
         *pIsEaten = TRUE;
         *pNeedToggleIMEMode = TRUE;
@@ -933,13 +941,21 @@ void CCompositionProcessorEngine::OnPreservedKey( //
         BOOL isOpen = FALSE;
         CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
         CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
-        CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen ? FALSE : TRUE);
+        isOpen = isOpen ? FALSE : TRUE;
+        CompartmentKeyboardOpen._SetCompartmentBOOL(isOpen);
 
         // Also toggle punctuation mode
         BOOL isPunctuation = FALSE;
         CCompartment CompartmentPunctuation(pThreadMgr, tfClientId, Global::MetasequoiaIMEGuidCompartmentPunctuation);
         CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
-        CompartmentPunctuation._SetCompartmentBOOL(isPunctuation ? FALSE : TRUE);
+        if (!isOpen && isPunctuation)
+        {
+            CompartmentPunctuation._SetCompartmentBOOL(FALSE);
+        }
+        else if (isOpen && !isPunctuation)
+        {
+            CompartmentPunctuation._SetCompartmentBOOL(TRUE);
+        }
 
         *pIsEaten = TRUE;
         *pNeedToggleIMEMode = TRUE;
@@ -1301,6 +1317,26 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
     }
     else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE))
     {
+        // 如果标点状态和当前输入法状态不一致，那么，需要更新标点状态
+        BOOL isOpen = FALSE;
+        CCompartment CompartmentKeyboardOpen(pThreadMgr, fakeThis->_tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+        CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
+
+        BOOL isPunctuation = FALSE;
+        CCompartment CompartmentPunctuation(pThreadMgr, fakeThis->_tfClientId,
+                                            Global::MetasequoiaIMEGuidCompartmentPunctuation);
+        CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
+        if (isOpen && !isPunctuation)
+        {
+            CompartmentPunctuation._SetCompartmentBOOL(TRUE);
+        }
+        else if (!isOpen && isPunctuation)
+        {
+            CompartmentPunctuation._SetCompartmentBOOL(FALSE);
+        }
+
+        SendIMESwitchEventToUIProcessViaNamedPipe(isOpen ? 1 : 0);
+
         fakeThis->KeyboardOpenCompartmentUpdated(pThreadMgr);
     }
 
