@@ -126,6 +126,29 @@ int InitNamedpipe()
         }
     }
 
+    if (Global::hToTsfWorkerThreadPipe == nullptr)
+    {
+        Global::hToTsfWorkerThreadPipe = CreateFile(  //
+            FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, //
+            GENERIC_READ | GENERIC_WRITE,             //
+            0,                                        //
+            nullptr,                                  //
+            OPEN_EXISTING,                            //
+            0,                                        //
+            nullptr                                   //
+        );
+
+        if (Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
+        {
+            Global::hToTsfWorkerThreadPipe = nullptr;
+            // SendToAuxNamedpipe(L"kill");
+        }
+        else
+        {
+            // TODO: Log
+        }
+    }
+
     return 0;
 }
 
@@ -181,6 +204,8 @@ int CloseNamedpipe()
     hPipe = nullptr;
     CloseHandle(hFromServerPipe);
     hFromServerPipe = nullptr;
+    CloseHandle(Global::hToTsfWorkerThreadPipe);
+    Global::hToTsfWorkerThreadPipe = nullptr;
     return 0;
 }
 

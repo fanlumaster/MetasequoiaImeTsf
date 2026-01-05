@@ -8,6 +8,7 @@ inline const int BUFFER_SIZE = 4096;
 
 inline const wchar_t *FANY_IME_NAMED_PIPE = L"\\\\.\\pipe\\FanyImeNamedPipe";
 inline const wchar_t *FANY_IME_TO_TSF_NAMED_PIPE = L"\\\\.\\pipe\\FanyImeToTsfNamedPipe";
+inline const wchar_t *FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE = L"\\\\.\\pipe\\FanyImeToTsfWorkerThreadNamedPipe";
 inline const wchar_t *FANY_IME_AUX_NAMED_PIPE = L"\\\\.\\pipe\\FanyImeAuxNamedPipe";
 
 inline const std::vector<std::wstring> FANY_IME_EVENT_ARRAY = {
@@ -71,6 +72,23 @@ struct FanyImeNamedpipeDataToTsf
 {
     UINT msg_type;
     wchar_t candidate_string[200]; // 200 chars at most
+};
+
+//
+// Data sent to tsf worker thread
+//
+// msg_type
+//   0: IME switch to EN
+//   1: IME switch to CN
+//
+// data
+//   Not used now.
+//
+//
+struct FanyImeNamedpipeDataToTsfWorkerThread
+{
+    UINT msg_type;
+    wchar_t data[200];
 };
 
 int InitIpc();
@@ -148,4 +166,13 @@ constexpr UINT OutofRange = 1;
 constexpr UINT NeedToCreateWord = 2;
 constexpr UINT Preedit = 3;
 } // namespace DataFromServerMsgType
+
+namespace DataToTsfWorkerThreadMsgType
+{
+constexpr UINT SwitchToEnglish = 0;
+constexpr UINT SwitchToChinese = 1;
+} // namespace DataToTsfWorkerThreadMsgType
+
+inline HANDLE hToTsfWorkerThreadPipe = nullptr;
+
 } // namespace Global

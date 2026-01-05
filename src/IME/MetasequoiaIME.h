@@ -2,6 +2,8 @@
 
 #include "KeyHandlerEditSession.h"
 #include "MetasequoiaIMEBaseStructure.h"
+#include <atomic>
+#include <thread>
 
 class CLangBarItemButton;
 class CCandidateListUIPresenter;
@@ -153,6 +155,8 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
                                                      _Out_opt_ HINSTANCE *phInst);
     static HRESULT CMetasequoiaIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath) WCHAR *wchPath, DWORD cchPath);
 
+    static void IpcWorkerThread(CMetasequoiaIME *pIME);
+
   private:
     // functions for the composition object.
     HRESULT _HandleCompositionInputWorker(_In_ CCompositionProcessorEngine *pCompositionProcessorEngine,
@@ -264,6 +268,8 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
     DWORD _dwSIPIMEOnOffCompartmentSinkCookie;
 
     HWND _msgWndHandle;
+    std::thread *_pIpcThread;
+    std::atomic<bool> _shouldStopIpcThread;
 
     LONG _refCount;
 

@@ -6,6 +6,7 @@
 #include "Compartment.h"
 #include "define.h"
 #include <debugapi.h>
+#include <namedpipeapi.h>
 #include <winnt.h>
 #include <winuser.h>
 #include <Windows.h>
@@ -93,6 +94,10 @@ CMetasequoiaIME::CMetasequoiaIME()
     _pContext = nullptr;
 
     _refCount = 1;
+
+    _msgWndHandle = nullptr;
+    _pIpcThread = nullptr;
+    _shouldStopIpcThread = false;
 }
 
 //+---------------------------------------------------------------------------
@@ -109,6 +114,17 @@ CMetasequoiaIME::~CMetasequoiaIME()
         _pCandidateListUIPresenter = nullptr;
     }
     DllRelease();
+
+    /* 处理线程的清理 */
+    if (_pIpcThread)
+    {
+        if (_pIpcThread->joinable())
+        {
+            _pIpcThread->join();
+        }
+        delete _pIpcThread;
+        _pIpcThread = nullptr;
+    }
 }
 
 //+---------------------------------------------------------------------------
@@ -251,6 +267,30 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
         goto ExitError;
     }
 
+    // Register generic window class for message-only window
+    WNDCLASSEX wcex = {};
+    wcex.cbSize = sizeof(WNDCLASSEX);
+    wcex.lpfnWndProc = CMetasequoiaIME_WindowProc;
+    wcex.hInstance = Global::dllInstanceHandle;
+    wcex.lpszClassName = L"MetasequoiaIMEWorkerWnd";
+    wcex.cbWndExtra = sizeof(LONG_PTR);
+    RegisterClassEx(&wcex);
+
+    _msgWndHandle = CreateWindowEx( //
+        0,                          //
+        L"MetasequoiaIMEWorkerWnd", //
+        L"MetasequoiaIMEWorkerWnd", //
+        0, 0, 0, 0, 0,              //
+        HWND_MESSAGE,               //
+        nullptr,                    //
+        Global::dllInstanceHandle,  //
+        this);
+    SetWindowLongPtr(_msgWndHandle, GWLP_USERDATA, (LONG_PTR)this);
+
+    /* 创建 IPC 线程 */
+    _shouldStopIpcThread = false;
+    _pIpcThread = new std::thread(IpcWorkerThread, this);
+
     ITfDocumentMgr *pDocMgrFocus = nullptr;
     if (SUCCEEDED(_pThreadMgr->GetFocus(&pDocMgrFocus)) && (pDocMgrFocus != nullptr))
     {
@@ -338,8 +378,20 @@ STDAPI CMetasequoiaIME::Deactivate()
     // 注销此输入法时，向 server 端发送一个注销的消息
     SendIMEDeactivationEventToUIProcessViaNamedPipe();
 
+    /* 清理 IPC 线程 */
+    _shouldStopIpcThread = true;
+    // CancelIoEx(Global::hToTsfWorkerThreadPipe, nullptr);
+    // CloseHandle(Global::hToTsfWorkerThreadPipe);
+    // Global::hToTsfWorkerThreadPipe = nullptr;
     // Clean IPC
+    /* 必须先 CloseIpc，再 join 线程 */
     CloseIpc();
+    if (_pIpcThread && _pIpcThread->joinable())
+    {
+        _pIpcThread->join();
+        delete _pIpcThread;
+        _pIpcThread = nullptr;
+    }
     // TODO: 去掉共享内存，只保留命名管道
     // CloseNamedpipe();
 
@@ -407,7 +459,119 @@ STDAPI CMetasequoiaIME::Deactivate()
         _pDocMgrLastFocused = nullptr;
     }
 
+    /* 清理消息窗口 */
+    if (_msgWndHandle)
+    {
+        DestroyWindow(_msgWndHandle);
+        _msgWndHandle = nullptr;
+    }
+    UnregisterClass(L"MetasequoiaIMEWorkerWnd", Global::dllInstanceHandle);
+
     return S_OK;
+}
+
+//+---------------------------------------------------------------------------
+//
+// IpcWorkerThread
+// 从 Server 端接收消息
+//
+//----------------------------------------------------------------------------
+void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
+{
+    while (!pIME->_shouldStopIpcThread)
+    {
+        /* 重新建立连接 */
+        if (Global::hToTsfWorkerThreadPipe == nullptr || Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
+        {
+            if (!WaitNamedPipe(FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, 100))
+            {
+                continue;
+            }
+            Global::hToTsfWorkerThreadPipe = CreateFile(  //
+                FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, //
+                GENERIC_READ | GENERIC_WRITE,             //
+                0,                                        //
+                nullptr,                                  //
+                OPEN_EXISTING,                            //
+                0,                                        //
+                nullptr                                   //
+            );
+        }
+
+        /* 阻塞读 */
+        while (!pIME->_shouldStopIpcThread)
+        {
+            DWORD bytesRead = 0;
+            FanyImeNamedpipeDataToTsfWorkerThread buf;
+            BOOL readResult = ReadFile(         //
+                Global::hToTsfWorkerThreadPipe, //
+                &buf,                           //
+                sizeof(buf),                    //
+                &bytesRead,                     //
+                nullptr                         //
+            );
+
+            if (!readResult || bytesRead == 0)
+            {
+                CloseHandle(Global::hToTsfWorkerThreadPipe);
+                Global::hToTsfWorkerThreadPipe = nullptr;
+                break; // 断线，回到外层重连
+            }
+
+            if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
+            {
+                PostMessage(                                               //
+                    pIME->_msgWndHandle,                                   //
+                    WM_CheckGlobalCompartment,                             //
+                    Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish, //
+                    0);
+                OutputDebugString(fmt::format(L"Switch to English").c_str());
+            }
+            else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToChinese)
+            {
+                PostMessage(                                               //
+                    pIME->_msgWndHandle,                                   //
+                    WM_CheckGlobalCompartment,                             //
+                    Global::DataToTsfWorkerThreadMsgType::SwitchToChinese, //
+                    0);
+                OutputDebugString(fmt::format(L"Switch to Chinese").c_str());
+            }
+        }
+    }
+}
+
+//+---------------------------------------------------------------------------
+//
+// CMetasequoiaIME_WindowProc
+//
+//----------------------------------------------------------------------------
+LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    CMetasequoiaIME *pIME = (CMetasequoiaIME *)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+    if (!pIME)
+    {
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+
+    switch (message)
+    {
+    case WM_CheckGlobalCompartment:
+        if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
+        {
+            OutputDebugString(fmt::format(L"Wnd Switch to English").c_str());
+            pIME->GetCompositionProcessorEngine()->SetIMEMode(pIME->_GetThreadMgr(), pIME->_GetClientId(), FALSE);
+        }
+        else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToChinese)
+        {
+            OutputDebugString(fmt::format(L"Wnd Switch to Chinese").c_str());
+            pIME->GetCompositionProcessorEngine()->SetIMEMode(pIME->_GetThreadMgr(), pIME->_GetClientId(), TRUE);
+            OutputDebugString(fmt::format(L"Switch to Chinese").c_str());
+        }
+        break;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
 }
 
 //+---------------------------------------------------------------------------

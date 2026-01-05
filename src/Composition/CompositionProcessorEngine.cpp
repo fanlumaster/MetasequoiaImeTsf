@@ -1026,6 +1026,23 @@ void CCompositionProcessorEngine::ToggleIMEMode(_In_ ITfThreadMgr *pThreadMgr, T
 
 //+---------------------------------------------------------------------------
 //
+// SetIMEMode
+//
+//----------------------------------------------------------------------------
+void CCompositionProcessorEngine::SetIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL bOpen)
+{
+    BOOL isOpen = FALSE;
+    CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+    CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
+
+    if (isOpen != bOpen)
+    {
+        CompartmentKeyboardOpen._SetCompartmentBOOL(bOpen);
+    }
+}
+
+//+---------------------------------------------------------------------------
+//
 // SetupConfiguration
 //
 //----------------------------------------------------------------------------
