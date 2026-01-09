@@ -482,24 +482,6 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
 {
     while (!pIME->_shouldStopIpcThread)
     {
-        /* 重新建立连接 */
-        if (Global::hToTsfWorkerThreadPipe == nullptr || Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
-        {
-            if (!WaitNamedPipe(FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, 100))
-            {
-                continue;
-            }
-            Global::hToTsfWorkerThreadPipe = CreateFile(  //
-                FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, //
-                GENERIC_READ | GENERIC_WRITE,             //
-                0,                                        //
-                nullptr,                                  //
-                OPEN_EXISTING,                            //
-                0,                                        //
-                nullptr                                   //
-            );
-        }
-
         /* 阻塞读 */
         while (!pIME->_shouldStopIpcThread)
         {
@@ -515,9 +497,7 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
 
             if (!readResult || bytesRead == 0)
             {
-                CloseHandle(Global::hToTsfWorkerThreadPipe);
-                Global::hToTsfWorkerThreadPipe = nullptr;
-                break; // 断线，回到外层重连
+                break;
             }
 
             if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
@@ -539,6 +519,7 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                 OutputDebugString(fmt::format(L"Switch to Chinese").c_str());
             }
         }
+        Sleep(100);
     }
 }
 
@@ -557,7 +538,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
 
     switch (message)
     {
-    case WM_CheckGlobalCompartment:
+    case WM_CheckGlobalCompartment: {
         if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
         {
             OutputDebugString(fmt::format(L"Wnd Switch to English").c_str());
@@ -570,6 +551,10 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             OutputDebugString(fmt::format(L"Switch to Chinese").c_str());
         }
         break;
+    }
+    case WM_ConnectNamedpipe: {
+        break;
+    }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

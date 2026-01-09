@@ -12,8 +12,6 @@
 
 STDAPI CMetasequoiaIME::OnSetThreadFocus()
 {
-    // Connect to namedpipe
-    InitNamedpipe();
     if (_pCandidateListUIPresenter)
     {
         ITfDocumentMgr *pCandidateListDocumentMgr = nullptr;
@@ -40,8 +38,6 @@ STDAPI CMetasequoiaIME::OnSetThreadFocus()
 
 STDAPI CMetasequoiaIME::OnKillThreadFocus()
 {
-    // Disconnect from namedpipe
-    CloseNamedpipe();
     if (_pCandidateListUIPresenter)
     {
         ITfDocumentMgr *pCandidateListDocumentMgr = nullptr;

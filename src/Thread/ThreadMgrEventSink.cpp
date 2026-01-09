@@ -2,6 +2,7 @@
 #include "Globals.h"
 #include "MetasequoiaIME.h"
 #include "CandidateListUIPresenter.h"
+#include "Ipc.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -43,6 +44,18 @@ STDAPI CMetasequoiaIME::OnUninitDocumentMgr(_In_ ITfDocumentMgr *pDocMgr)
 STDAPI CMetasequoiaIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDocumentMgr *pDocMgrPrevFocus)
 {
     pDocMgrPrevFocus;
+
+    if (pDocMgrFocus && !Global::g_connected)
+    {
+
+        InitNamedpipe();
+        Global::g_connected = true;
+    }
+    else if (!pDocMgrFocus && Global::g_connected)
+    {
+        CloseNamedpipe();
+        Global::g_connected = false;
+    }
 
     _InitTextEditSink(pDocMgrFocus);
 

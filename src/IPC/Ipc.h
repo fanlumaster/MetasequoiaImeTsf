@@ -117,6 +117,8 @@ int SendIMEActivationEventToUIProcessViaNamedPipe();
 int SendIMEDeactivationEventToUIProcessViaNamedPipe();
 int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus);
 
+void SendToAuxNamedpipe(std::wstring pipeData);
+
 //
 // For named pipe
 //
@@ -174,5 +176,7 @@ constexpr UINT SwitchToChinese = 1;
 } // namespace DataToTsfWorkerThreadMsgType
 
 inline HANDLE hToTsfWorkerThreadPipe = nullptr;
+
+inline bool g_connected = false;
 
 } // namespace Global

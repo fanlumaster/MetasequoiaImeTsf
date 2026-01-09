@@ -22,8 +22,6 @@ FanyImeNamedpipeDataToTsf namedpipeDataFromServer = {};
 /* Data size transfered from Server process */
 static const int ServerDtPipeDataSize = 512;
 
-void SendToAuxNamedpipe(std::wstring pipeData);
-
 int InitIpc()
 {
     //
@@ -149,7 +147,17 @@ int InitNamedpipe()
         }
     }
 
-    return 0;
+    if (hPipe == nullptr || hPipe == INVALID_HANDLE_VALUE || hFromServerPipe == nullptr ||
+        hFromServerPipe == INVALID_HANDLE_VALUE || Global::hToTsfWorkerThreadPipe == nullptr ||
+        Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
+    {
+        hPipe = nullptr;
+        hFromServerPipe = nullptr;
+        Global::hToTsfWorkerThreadPipe = nullptr;
+        return 0;
+    }
+
+    return 1;
 }
 
 int CloseIpc()

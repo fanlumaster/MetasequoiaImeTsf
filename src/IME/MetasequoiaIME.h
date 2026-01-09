@@ -10,18 +10,19 @@ class CCandidateListUIPresenter;
 class CCompositionProcessorEngine;
 
 const DWORD WM_CheckGlobalCompartment = WM_USER;
+const DWORD WM_ConnectNamedpipe = WM_USER + 1;
 LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CMetasequoiaIME : public ITfTextInputProcessorEx,
-                   public ITfThreadMgrEventSink,
-                   public ITfTextEditSink,
-                   public ITfKeyEventSink,
-                   public ITfCompositionSink,
-                   public ITfDisplayAttributeProvider,
-                   public ITfActiveLanguageProfileNotifySink,
-                   public ITfThreadFocusSink,
-                   public ITfFunctionProvider,
-                   public ITfFnGetPreferredTouchKeyboardLayout
+                        public ITfThreadMgrEventSink,
+                        public ITfTextEditSink,
+                        public ITfKeyEventSink,
+                        public ITfCompositionSink,
+                        public ITfDisplayAttributeProvider,
+                        public ITfActiveLanguageProfileNotifySink,
+                        public ITfThreadFocusSink,
+                        public ITfFunctionProvider,
+                        public ITfFnGetPreferredTouchKeyboardLayout
 {
   public:
     CMetasequoiaIME();
@@ -150,10 +151,12 @@ class CMetasequoiaIME : public ITfTextInputProcessorEx,
 
     // comless helpers
     static HRESULT CMetasequoiaIME::CreateInstance(REFCLSID rclsid, REFIID riid, _Outptr_result_maybenull_ LPVOID *ppv,
-                                              _Out_opt_ HINSTANCE *phInst, BOOL isComLessMode);
-    static HRESULT CMetasequoiaIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid, _Outptr_result_maybenull_ void **ppv,
-                                                     _Out_opt_ HINSTANCE *phInst);
-    static HRESULT CMetasequoiaIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath) WCHAR *wchPath, DWORD cchPath);
+                                                   _Out_opt_ HINSTANCE *phInst, BOOL isComLessMode);
+    static HRESULT CMetasequoiaIME::ComLessCreateInstance(REFGUID rclsid, REFIID riid,
+                                                          _Outptr_result_maybenull_ void **ppv,
+                                                          _Out_opt_ HINSTANCE *phInst);
+    static HRESULT CMetasequoiaIME::GetComModuleName(REFGUID rclsid, _Out_writes_(cchPath) WCHAR *wchPath,
+                                                     DWORD cchPath);
 
     static void IpcWorkerThread(CMetasequoiaIME *pIME);
 
