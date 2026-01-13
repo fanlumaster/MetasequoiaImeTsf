@@ -93,6 +93,8 @@ struct FanyImeNamedpipeDataToTsfWorkerThread
 
 int InitIpc();
 int InitNamedpipe();
+int ConnectToAllNamedpipe();
+int ConnectToTsfNamedpipe();
 int CloseIpc();
 int CloseNamedpipe();
 

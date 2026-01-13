@@ -256,7 +256,7 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     }
     */
     // Set up IPC(named pipe)
-    InitIpc();
+    // InitIpc();
     // TODO: 去掉共享内存，只保留命名管道
     // InitNamedpipe();
 
@@ -288,6 +288,10 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
         Global::dllInstanceHandle,  //
         this);
     SetWindowLongPtr(_msgWndHandle, GWLP_USERDATA, (LONG_PTR)this);
+    Global::msgWndHandle = _msgWndHandle;
+
+    /* 连接命名管道 */
+    PostMessage(_msgWndHandle, WM_ConnectNamedpipe, 0, 0);
 
     /* 创建 IPC 线程 */
     _shouldStopIpcThread = false;
@@ -334,7 +338,7 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     _pCompositionProcessorEngine->InitializeMetasequoiaIMECompartment(pThreadMgr, tfClientId);
 
     // 激活此输入法时，向 server 端发送一个激活的消息
-    SendIMEActivationEventToUIProcessViaNamedPipe();
+    // SendIMEActivationEventToUIProcessViaNamedPipe();
 
     {
         HWND hwndTarget = GetFocus();
@@ -378,7 +382,7 @@ ExitError:
 STDAPI CMetasequoiaIME::Deactivate()
 {
     // 注销此输入法时，向 server 端发送一个注销的消息
-    SendIMEDeactivationEventToUIProcessViaNamedPipe();
+    // SendIMEDeactivationEventToUIProcessViaNamedPipe();
 
     /* 清理 IPC 线程 */
     _shouldStopIpcThread = true;
@@ -553,6 +557,28 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         break;
     }
     case WM_ConnectNamedpipe: {
+        SendToAuxNamedpipe(L"kill");
+        Sleep(50);
+        if (ConnectToAllNamedpipe())
+        {
+            OutputDebugString(fmt::format(L"Connected to named pipe").c_str());
+        }
+        else
+        {
+        }
+        break;
+    }
+    case WM_DisconnectNamedpipe: {
+        CloseNamedpipe();
+        break;
+    }
+    case WM_ConnectToTsfNamedpipe: {
+        OutputDebugString(fmt::format(L"Try to Connect to TSF named pipe").c_str());
+        Sleep(50);
+        if (ConnectToTsfNamedpipe())
+        {
+            break;
+        }
         break;
     }
     default:

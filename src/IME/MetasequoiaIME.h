@@ -11,6 +11,8 @@ class CCompositionProcessorEngine;
 
 const DWORD WM_CheckGlobalCompartment = WM_USER;
 const DWORD WM_ConnectNamedpipe = WM_USER + 1;
+const DWORD WM_DisconnectNamedpipe = WM_USER + 2;
+const DWORD WM_ConnectToTsfNamedpipe = WM_USER + 3;
 LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CMetasequoiaIME : public ITfTextInputProcessorEx,

@@ -44,3 +44,8 @@ namespace GlobalIme
 {
 inline std::wstring word_for_creating_word = L"";
 }
+
+namespace Global
+{
+inline HWND msgWndHandle = nullptr;
+}

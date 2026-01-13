@@ -1,4 +1,5 @@
 #include "Private.h"
+#include "fmt/xchar.h"
 #include "Globals.h"
 #include "MetasequoiaIME.h"
 #include "CandidateListUIPresenter.h"
@@ -47,14 +48,13 @@ STDAPI CMetasequoiaIME::OnSetFocus(_In_ ITfDocumentMgr *pDocMgrFocus, _In_ ITfDo
 
     if (pDocMgrFocus && !Global::g_connected)
     {
-
-        InitNamedpipe();
         Global::g_connected = true;
+        PostMessage(_msgWndHandle, WM_ConnectNamedpipe, 0, 0);
     }
     else if (!pDocMgrFocus && Global::g_connected)
     {
-        CloseNamedpipe();
         Global::g_connected = false;
+        PostMessage(_msgWndHandle, WM_DisconnectNamedpipe, 0, 0);
     }
 
     _InitTextEditSink(pDocMgrFocus);

@@ -3,6 +3,7 @@
 #include "MetasequoiaIME.h"
 #include "CandidateListUIPresenter.h"
 #include <debugapi.h>
+#include "fmt/xchar.h"
 
 //+---------------------------------------------------------------------------
 //

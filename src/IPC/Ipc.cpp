@@ -6,6 +6,8 @@
 #include <winnt.h>
 #include <winuser.h>
 #include "Globals.h"
+#include "FanyDefines.h"
+#include "MetasequoiaIME.h"
 #include <fmt/xchar.h>
 
 static HANDLE hMapFile = nullptr;
@@ -93,7 +95,6 @@ int InitNamedpipe()
         if (hPipe == INVALID_HANDLE_VALUE)
         {
             hPipe = nullptr;
-            SendToAuxNamedpipe(L"kill");
         }
         else
         {
@@ -116,7 +117,6 @@ int InitNamedpipe()
         if (hFromServerPipe == INVALID_HANDLE_VALUE)
         {
             hFromServerPipe = nullptr;
-            // SendToAuxNamedpipe(L"kill");
         }
         else
         {
@@ -139,7 +139,6 @@ int InitNamedpipe()
         if (Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
         {
             Global::hToTsfWorkerThreadPipe = nullptr;
-            // SendToAuxNamedpipe(L"kill");
         }
         else
         {
@@ -157,6 +156,108 @@ int InitNamedpipe()
         return 0;
     }
 
+    return 1;
+}
+
+int ConnectToAllNamedpipe()
+{
+    hPipe = CreateFile(               //
+        FANY_IME_NAMED_PIPE,          //
+        GENERIC_READ | GENERIC_WRITE, //
+        0,                            //
+        nullptr,                      //
+        OPEN_EXISTING,                //
+        0,                            //
+        nullptr                       //
+    );
+
+    if (hPipe == INVALID_HANDLE_VALUE)
+    {
+        hPipe = nullptr;
+    }
+    else
+    {
+        // TODO: Log
+    }
+
+    hFromServerPipe = CreateFile(     //
+        FANY_IME_TO_TSF_NAMED_PIPE,   //
+        GENERIC_READ | GENERIC_WRITE, //
+        0,                            //
+        nullptr,                      //
+        OPEN_EXISTING,                //
+        0,                            //
+        nullptr                       //
+    );
+
+    if (hFromServerPipe == INVALID_HANDLE_VALUE)
+    {
+        hFromServerPipe = nullptr;
+    }
+    else
+    {
+        // TODO: Log
+    }
+
+    Global::hToTsfWorkerThreadPipe = CreateFile(  //
+        FANY_IME_TO_TSF_WORKER_THREAD_NAMED_PIPE, //
+        GENERIC_READ | GENERIC_WRITE,             //
+        0,                                        //
+        nullptr,                                  //
+        OPEN_EXISTING,                            //
+        0,                                        //
+        nullptr                                   //
+    );
+
+    if (Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
+    {
+        Global::hToTsfWorkerThreadPipe = nullptr;
+    }
+    else
+    {
+        // TODO: Log
+    }
+
+    if (hPipe == nullptr || hPipe == INVALID_HANDLE_VALUE || hFromServerPipe == nullptr ||
+        hFromServerPipe == INVALID_HANDLE_VALUE || Global::hToTsfWorkerThreadPipe == nullptr ||
+        Global::hToTsfWorkerThreadPipe == INVALID_HANDLE_VALUE)
+    {
+        hPipe = nullptr;
+        hFromServerPipe = nullptr;
+        Global::hToTsfWorkerThreadPipe = nullptr;
+        return 0;
+    }
+
+    return 1;
+}
+
+int ConnectToTsfNamedpipe()
+{
+    if (hFromServerPipe == nullptr || hFromServerPipe == INVALID_HANDLE_VALUE)
+    {
+        hFromServerPipe = CreateFile(     //
+            FANY_IME_TO_TSF_NAMED_PIPE,   //
+            GENERIC_READ | GENERIC_WRITE, //
+            0,                            //
+            nullptr,                      //
+            OPEN_EXISTING,                //
+            0,                            //
+            nullptr                       //
+        );
+
+        if (hFromServerPipe == INVALID_HANDLE_VALUE)
+        {
+            hFromServerPipe = nullptr;
+        }
+        else
+        {
+            // TODO: Log
+        }
+    }
+    if (hFromServerPipe == nullptr || hFromServerPipe == INVALID_HANDLE_VALUE)
+    {
+        return 0;
+    }
     return 1;
 }
 
@@ -481,20 +582,26 @@ void SendToNamedpipe()
     {
         /* Error handling: 必须将 hPipe 置为无效，否则将留下脏句柄，导致有些情况下无法再次连接 */
         DWORD err = GetLastError();
-        if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
-        {
-            /* 将两个方向的管道同时置为无效 */
-            CloseHandle(hPipe);
-            CloseHandle(hFromServerPipe);
-            hPipe = INVALID_HANDLE_VALUE;
-            hFromServerPipe = INVALID_HANDLE_VALUE;
-            /* 向 Server 端发送 kill 同时重置两个管道的 connect */
-            SendToAuxNamedpipe(L"kill");
-        }
+        // if (err == ERROR_BROKEN_PIPE || err == ERROR_NO_DATA)
+        // {
+        /* 将两个方向的管道同时置为无效 */
+        CloseHandle(hPipe);
+        CloseHandle(hFromServerPipe);
+        // CloseHandle(Global::hToTsfWorkerThreadPipe);
+        hPipe = INVALID_HANDLE_VALUE;
+        hFromServerPipe = INVALID_HANDLE_VALUE;
+        // Global::hToTsfWorkerThreadPipe = INVALID_HANDLE_VALUE;
+        /* 向 Server 端发送 kill 同时重置两个管道的 connect */
+        SendToAuxNamedpipe(L"kill");
+        OutputDebugString(fmt::format(L"SendToNamedpipe failed eventually01.").c_str());
+        // }
 
         //
         // 等待 Server 准备好，再重连几次
         //
+
+        /* toTsfNamedPipe 放到消息窗口的线程中去处理 */
+        PostMessage(Global::msgWndHandle, WM_ConnectToTsfNamedpipe, 0, 0);
         for (int i = 0; i < 10; ++i)
         {
             Sleep(10);
@@ -514,6 +621,7 @@ void SendToNamedpipe()
         if (hPipe == INVALID_HANDLE_VALUE)
         {
             // TODO: Log
+            OutputDebugString(fmt::format(L"SendToNamedpipe failed eventually02.").c_str());
             return;
         }
         else
@@ -533,6 +641,7 @@ void SendToNamedpipe()
         if (!ret || bytesWritten != sizeof(namedpipeData))
         {
             // TODO: Error handling
+            OutputDebugString(fmt::format(L"SendToNamedpipe failed eventually03.").c_str());
         }
 
         return;
