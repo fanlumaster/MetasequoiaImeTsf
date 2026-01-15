@@ -338,7 +338,7 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     _pCompositionProcessorEngine->InitializeMetasequoiaIMECompartment(pThreadMgr, tfClientId);
 
     // 激活此输入法时，向 server 端发送一个激活的消息
-    // SendIMEActivationEventToUIProcessViaNamedPipe();
+    PostMessage(_msgWndHandle, WM_IMEActivation, 0, 0);
 
     {
         HWND hwndTarget = GetFocus();
@@ -382,7 +382,8 @@ ExitError:
 STDAPI CMetasequoiaIME::Deactivate()
 {
     // 注销此输入法时，向 server 端发送一个注销的消息
-    // SendIMEDeactivationEventToUIProcessViaNamedPipe();
+    // 注销不要给消息窗口发送消息，而是直接在这里处理
+    SendIMEDeactivationEventToUIProcessViaNamedPipe();
 
     /* 清理 IPC 线程 */
     _shouldStopIpcThread = true;
@@ -579,6 +580,10 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         {
             break;
         }
+        break;
+    }
+    case WM_IMEActivation: {
+        SendIMEActivationEventToUIProcessViaNamedPipe();
         break;
     }
     default:
