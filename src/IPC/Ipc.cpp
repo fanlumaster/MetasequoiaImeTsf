@@ -941,6 +941,36 @@ int SendIMEActivationEventToUIProcessViaNamedPipe()
     return 0;
 }
 
+/**
+ * @brief Send IME status to UI process via named pipe
+ *
+ * @param kbdIsOpen
+ * @param puncIsOpen
+ * @return int
+ */
+int SendIMEStatusEventToUIProcessViaNamedPipe(bool kbdIsOpen, bool puncIsOpen)
+{
+    std::wstring status = L"ftbStatus";
+    if (kbdIsOpen)
+    {
+        status += L"1";
+    }
+    else
+    {
+        status += L"0";
+    }
+    if (puncIsOpen)
+    {
+        status += L"1";
+    }
+    else
+    {
+        status += L"0";
+    }
+    SendToAuxNamedpipe(status);
+    return 0;
+}
+
 int SendIMEDeactivationEventToUIProcessViaNamedPipe()
 {
     SendToAuxNamedpipe(L"IMEDeactivation");

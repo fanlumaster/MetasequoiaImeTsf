@@ -616,6 +616,13 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         SendIMEActivationEventToUIProcessViaNamedPipe();
         break;
     }
+    case WM_ThreadFocus: {
+        /* 通知 server 端更新一下 ftb 中英和标点的状态 */
+        SendIMEStatusEventToUIProcessViaNamedPipe(                                                          //
+            pIME->GetCompositionProcessorEngine()->GetIMEMode(pIME->_GetThreadMgr(), pIME->_GetClientId()), //
+            pIME->GetCompositionProcessorEngine()->GetPunctuationMode(pIME->_GetThreadMgr(), pIME->_GetClientId()));
+        break;
+    }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }

@@ -1041,6 +1041,21 @@ void CCompositionProcessorEngine::SetIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfCl
     }
 }
 
+/**
+ * @brief 获取当前 IME 的状态
+ *
+ * @param pThreadMgr
+ * @param tfClientId
+ * @return BOOL True: 中文输入法打开， False: 中文输入法关闭
+ */
+BOOL CCompositionProcessorEngine::GetIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
+{
+    BOOL isOpen = FALSE;
+    CCompartment CompartmentKeyboardOpen(pThreadMgr, tfClientId, GUID_COMPARTMENT_KEYBOARD_OPENCLOSE);
+    CompartmentKeyboardOpen._GetCompartmentBOOL(isOpen);
+    return isOpen;
+}
+
 //+---------------------------------------------------------------------------
 //
 // SetPunctuationMode
@@ -1056,6 +1071,21 @@ void CCompositionProcessorEngine::SetPunctuationMode(_In_ ITfThreadMgr *pThreadM
     {
         CompartmentPunctuation._SetCompartmentBOOL(bOpen);
     }
+}
+
+/**
+ * @brief 获取当前标点符号模式
+ *
+ * @param pThreadMgr
+ * @param tfClientId
+ * @return BOOL True: 中文标点符号打开， False: 中文标点符号关闭
+ */
+BOOL CCompositionProcessorEngine::GetPunctuationMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
+{
+    BOOL isOpen = FALSE;
+    CCompartment CompartmentPunctuation(pThreadMgr, tfClientId, Global::MetasequoiaIMEGuidCompartmentPunctuation);
+    CompartmentPunctuation._GetCompartmentBOOL(isOpen);
+    return isOpen;
 }
 
 //+---------------------------------------------------------------------------

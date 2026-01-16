@@ -67,7 +67,9 @@ class CCompositionProcessorEngine
     // Toggle IME Mode
     void ToggleIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
     void SetIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL bOpen);
+    BOOL CCompositionProcessorEngine::GetIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
     void SetPunctuationMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL bOpen);
+    BOOL GetPunctuationMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId);
 
     // Punctuation
     BOOL IsPunctuation(WCHAR wch);
