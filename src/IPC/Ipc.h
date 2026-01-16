@@ -118,6 +118,7 @@ int SendLangbarRightClickEventToUIProcess(const RECT *prcArea);
 int SendIMEActivationEventToUIProcessViaNamedPipe();
 int SendIMEDeactivationEventToUIProcessViaNamedPipe();
 int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus);
+int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc);
 
 void SendToAuxNamedpipe(std::wstring pipeData);
 
@@ -175,6 +176,8 @@ namespace DataToTsfWorkerThreadMsgType
 {
 constexpr UINT SwitchToEnglish = 0;
 constexpr UINT SwitchToChinese = 1;
+constexpr UINT SwitchToPuncEn = 2;
+constexpr UINT SwitchToPuncCn = 3;
 } // namespace DataToTsfWorkerThreadMsgType
 
 inline HANDLE hToTsfWorkerThreadPipe = nullptr;

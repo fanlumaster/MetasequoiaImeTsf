@@ -523,6 +523,24 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     0);
                 OutputDebugString(fmt::format(L"Switch to Chinese").c_str());
             }
+            else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncEn)
+            {
+                PostMessage(                                              //
+                    pIME->_msgWndHandle,                                  //
+                    WM_CheckGlobalCompartment,                            //
+                    Global::DataToTsfWorkerThreadMsgType::SwitchToPuncEn, //
+                    0);
+                OutputDebugString(fmt::format(L"Switch to Punc En").c_str());
+            }
+            else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncCn)
+            {
+                PostMessage(                                              //
+                    pIME->_msgWndHandle,                                  //
+                    WM_CheckGlobalCompartment,                            //
+                    Global::DataToTsfWorkerThreadMsgType::SwitchToPuncCn, //
+                    0);
+                OutputDebugString(fmt::format(L"Switch to Punc Cn").c_str());
+            }
         }
         Sleep(100);
     }
@@ -554,6 +572,18 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             OutputDebugString(fmt::format(L"Wnd Switch to Chinese").c_str());
             pIME->GetCompositionProcessorEngine()->SetIMEMode(pIME->_GetThreadMgr(), pIME->_GetClientId(), TRUE);
             OutputDebugString(fmt::format(L"Switch to Chinese").c_str());
+        }
+        else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncEn)
+        {
+            OutputDebugString(fmt::format(L"Wnd Switch to Punc En").c_str());
+            pIME->GetCompositionProcessorEngine()->SetPunctuationMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
+                                                                      FALSE);
+        }
+        else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncCn)
+        {
+            OutputDebugString(fmt::format(L"Wnd Switch to Punc Cn").c_str());
+            pIME->GetCompositionProcessorEngine()->SetPunctuationMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
+                                                                      TRUE);
         }
         break;
     }

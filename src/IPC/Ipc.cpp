@@ -957,3 +957,13 @@ int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus)
 
     return 0;
 }
+
+int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc)
+{
+    namedpipeData.event_type = 8;
+    /* 利用其他的字段，把标点符号的中英状态传递过去 */
+    namedpipeData.keycode = isPunc;
+    SendToNamedpipe();
+
+    return 0;
+}

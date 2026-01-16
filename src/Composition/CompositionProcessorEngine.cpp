@@ -1043,6 +1043,23 @@ void CCompositionProcessorEngine::SetIMEMode(_In_ ITfThreadMgr *pThreadMgr, TfCl
 
 //+---------------------------------------------------------------------------
 //
+// SetPunctuationMode
+//
+//----------------------------------------------------------------------------
+void CCompositionProcessorEngine::SetPunctuationMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId, BOOL bOpen)
+{
+    BOOL isOpen = FALSE;
+    CCompartment CompartmentPunctuation(pThreadMgr, tfClientId, Global::MetasequoiaIMEGuidCompartmentPunctuation);
+    CompartmentPunctuation._GetCompartmentBOOL(isOpen);
+
+    if (isOpen != bOpen)
+    {
+        CompartmentPunctuation._SetCompartmentBOOL(bOpen);
+    }
+}
+
+//+---------------------------------------------------------------------------
+//
 // SetupConfiguration
 //
 //----------------------------------------------------------------------------
@@ -1325,6 +1342,11 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
     if (IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte) ||
         IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentPunctuation))
     {
+        BOOL isPunctuation = FALSE;
+        CCompartment CompartmentPunctuation(pThreadMgr, fakeThis->_tfClientId,
+                                            Global::MetasequoiaIMEGuidCompartmentPunctuation);
+        CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
+        SendPuncSwitchEventToUIProcessViaNamedPipe(isPunctuation ? 1 : 0);
         fakeThis->PrivateCompartmentsUpdated(pThreadMgr);
     }
     else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION) ||
