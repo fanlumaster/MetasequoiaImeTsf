@@ -1088,6 +1088,41 @@ BOOL CCompositionProcessorEngine::GetPunctuationMode(_In_ ITfThreadMgr *pThreadM
     return isOpen;
 }
 
+/**
+ * @brief 设置全角/半角模式
+ *
+ * @param pThreadMgr
+ * @param tfClientId
+ * @param bOpen True: 全角， False: 半角
+ */
+void CCompositionProcessorEngine::SetDoubleSingleByteMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId,
+                                                          BOOL bOpen)
+{
+    BOOL isOpen = FALSE;
+    CCompartment CompartmentDoubleSingleByte(pThreadMgr, tfClientId,
+                                             Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte);
+    CompartmentDoubleSingleByte._GetCompartmentBOOL(isOpen);
+
+    if (isOpen != bOpen)
+    {
+        CompartmentDoubleSingleByte._SetCompartmentBOOL(bOpen);
+    }
+}
+
+//+---------------------------------------------------------------------------
+//
+// GetDoubleSingleByteMode
+//
+//----------------------------------------------------------------------------
+BOOL CCompositionProcessorEngine::GetDoubleSingleByteMode(_In_ ITfThreadMgr *pThreadMgr, TfClientId tfClientId)
+{
+    BOOL isOpen = FALSE;
+    CCompartment CompartmentDoubleSingleByte(pThreadMgr, tfClientId,
+                                             Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte);
+    CompartmentDoubleSingleByte._GetCompartmentBOOL(isOpen);
+    return isOpen;
+}
+
 //+---------------------------------------------------------------------------
 //
 // SetupConfiguration
@@ -1369,8 +1404,17 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         return E_FAIL;
     }
 
-    if (IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte) ||
-        IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentPunctuation))
+    if (IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte))
+    {
+        BOOL isDoubleSingleByte = FALSE;
+        CCompartment CompartmentDoubleSingleByte(pThreadMgr, fakeThis->_tfClientId,
+                                                 Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte);
+        CompartmentDoubleSingleByte._GetCompartmentBOOL(isDoubleSingleByte);
+        // 0: halfwidth, 1: fullwidth
+        SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(isDoubleSingleByte ? 1 : 0);
+        fakeThis->PrivateCompartmentsUpdated(pThreadMgr);
+    }
+    else if (IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentPunctuation))
     {
         BOOL isPunctuation = FALSE;
         CCompartment CompartmentPunctuation(pThreadMgr, fakeThis->_tfClientId,

@@ -997,3 +997,13 @@ int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc)
 
     return 0;
 }
+
+int SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(BOOL isDoubleSingleByte)
+{
+    namedpipeData.event_type = 9;
+    /* 利用其他的字段，把全角/半角的状态传递过去 */
+    namedpipeData.keycode = isDoubleSingleByte;
+    SendToNamedpipe();
+
+    return 0;
+}

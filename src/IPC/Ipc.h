@@ -120,6 +120,7 @@ int SendIMEDeactivationEventToUIProcessViaNamedPipe();
 int SendIMEStatusEventToUIProcessViaNamedPipe(bool kbdIsOpen, bool puncIsOpen);
 int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus);
 int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc);
+int SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(BOOL isDoubleSingleByte);
 
 void SendToAuxNamedpipe(std::wstring pipeData);
 
@@ -179,6 +180,8 @@ constexpr UINT SwitchToEnglish = 0;
 constexpr UINT SwitchToChinese = 1;
 constexpr UINT SwitchToPuncEn = 2;
 constexpr UINT SwitchToPuncCn = 3;
+constexpr UINT SwitchToFullwidth = 4;
+constexpr UINT SwitchToHalfwidth = 5;
 } // namespace DataToTsfWorkerThreadMsgType
 
 inline HANDLE hToTsfWorkerThreadPipe = nullptr;

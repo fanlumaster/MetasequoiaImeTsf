@@ -541,6 +541,24 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     0);
                 OutputDebugString(fmt::format(L"Switch to Punc Cn").c_str());
             }
+            else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToFullwidth)
+            {
+                PostMessage(                                                 //
+                    pIME->_msgWndHandle,                                     //
+                    WM_CheckGlobalCompartment,                               //
+                    Global::DataToTsfWorkerThreadMsgType::SwitchToFullwidth, //
+                    0);
+                OutputDebugString(fmt::format(L"Switch to Fullwidth").c_str());
+            }
+            else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToHalfwidth)
+            {
+                PostMessage(                                                 //
+                    pIME->_msgWndHandle,                                     //
+                    WM_CheckGlobalCompartment,                               //
+                    Global::DataToTsfWorkerThreadMsgType::SwitchToHalfwidth, //
+                    0);
+                OutputDebugString(fmt::format(L"Switch to Halfwidth").c_str());
+            }
         }
         Sleep(100);
     }
@@ -584,6 +602,18 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             OutputDebugString(fmt::format(L"Wnd Switch to Punc Cn").c_str());
             pIME->GetCompositionProcessorEngine()->SetPunctuationMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
                                                                       TRUE);
+        }
+        else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToFullwidth)
+        {
+            OutputDebugString(fmt::format(L"Wnd Switch to Fullwidth").c_str());
+            pIME->GetCompositionProcessorEngine()->SetDoubleSingleByteMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
+                                                                           TRUE);
+        }
+        else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToHalfwidth)
+        {
+            OutputDebugString(fmt::format(L"Wnd Switch to Halfwidth").c_str());
+            pIME->GetCompositionProcessorEngine()->SetDoubleSingleByteMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
+                                                                           FALSE);
         }
         break;
     }
