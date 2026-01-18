@@ -117,7 +117,7 @@ int SendMoveCandidateWndEventToUIProcess();
 int SendLangbarRightClickEventToUIProcess(const RECT *prcArea);
 int SendIMEActivationEventToUIProcessViaNamedPipe();
 int SendIMEDeactivationEventToUIProcessViaNamedPipe();
-int SendIMEStatusEventToUIProcessViaNamedPipe(bool kbdIsOpen, bool puncIsOpen);
+int SendIMEStatusEventToUIProcessViaNamedPipe(bool kbdIsOpen, bool fullwidthIsOpen, bool puncIsOpen);
 int SendIMESwitchEventToUIProcessViaNamedPipe(UINT uImeStatus);
 int SendPuncSwitchEventToUIProcessViaNamedPipe(BOOL isPunc);
 int SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(BOOL isDoubleSingleByte);

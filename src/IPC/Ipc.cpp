@@ -945,13 +945,22 @@ int SendIMEActivationEventToUIProcessViaNamedPipe()
  * @brief Send IME status to UI process via named pipe
  *
  * @param kbdIsOpen
+ * @param fullwidthIsOpen
  * @param puncIsOpen
  * @return int
  */
-int SendIMEStatusEventToUIProcessViaNamedPipe(bool kbdIsOpen, bool puncIsOpen)
+int SendIMEStatusEventToUIProcessViaNamedPipe(bool kbdIsOpen, bool fullwidthIsOpen, bool puncIsOpen)
 {
     std::wstring status = L"ftbStatus";
     if (kbdIsOpen)
+    {
+        status += L"1";
+    }
+    else
+    {
+        status += L"0";
+    }
+    if (fullwidthIsOpen)
     {
         status += L"1";
     }
