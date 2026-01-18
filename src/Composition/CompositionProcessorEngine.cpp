@@ -260,6 +260,12 @@ BOOL CCompositionProcessorEngine::AddVirtualKey(WCHAR wch)
         return FALSE;
     }
 
+    // Check if the keystroke buffer has reached the maximum length
+    if (_keystrokeBuffer.GetLength() >= MAX_PINYIN_LENGTH)
+    {
+        return FALSE;
+    }
+
     //
     // append one keystroke in buffer.
     //

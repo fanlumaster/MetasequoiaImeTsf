@@ -364,6 +364,17 @@ STDAPI CMetasequoiaIME::OnKeyDown(ITfContext *pContext, WPARAM wParam, LPARAM lP
     /* Send key event to server process */
     if (*pIsEaten)
     {
+        // 检查是否应该跳过发送此键到服务器，由于长度限制。
+        // 当达到限制时，我们只阻止字符输入键（FUNCTION_INPUT）。
+        // 这允许功能键如 Backspace、Space、Enter 仍然工作。
+        if (KeystrokeState.Function == FUNCTION_INPUT &&
+            _pCompositionProcessorEngine->GetVirtualKeyLength() >= MAX_PINYIN_LENGTH)
+        {
+            // 这个键仍然被吃掉（以防止它到达应用程序），
+            // 但我们不把它发送到 server 端，也不进一步处理它。
+            return S_OK;
+        }
+
         Global::Keycode = code;
         Global::wch = wch;
         if ((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0)

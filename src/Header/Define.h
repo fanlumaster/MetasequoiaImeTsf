@@ -22,6 +22,11 @@
 #define METASEQUOIAIME_LOCALE_DEFAULT L"zh-CN"
 
 //---------------------------------------------------------------------
+// defined max pinyin input length
+//---------------------------------------------------------------------
+#define MAX_PINYIN_LENGTH (64) // Maximum number of characters allowed in pinyin input
+
+//---------------------------------------------------------------------
 // defined Candidated Window
 //---------------------------------------------------------------------
 #define CANDWND_ROW_WIDTH (30)
