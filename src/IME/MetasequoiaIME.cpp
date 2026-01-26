@@ -618,14 +618,23 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         break;
     }
     case WM_ConnectNamedpipe: {
+        OutputDebugString(fmt::format(L"Try to connect named pipe via WM_ConnectNamedpipe").c_str());
         SendToAuxNamedpipe(L"kill");
-        Sleep(50);
-        if (ConnectToAllNamedpipe())
+        for (int retry = 0; retry < 3; ++retry)
         {
-            OutputDebugString(fmt::format(L"Connected to named pipe").c_str());
-        }
-        else
-        {
+            // 如果用户已经切换走了，就不用继续重试
+            if (!Global::g_connected)
+            {
+                break;
+            }
+            OutputDebugString(
+                fmt::format(L"Try to connect named pipe via WM_ConnectNamedpipe, retry: {}", retry).c_str());
+            Sleep(50);
+            if (ConnectToAllNamedpipe())
+            {
+                OutputDebugString(fmt::format(L"Connected to named pipe").c_str());
+                break;
+            }
         }
         break;
     }
@@ -647,6 +656,7 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         break;
     }
     case WM_ThreadFocus: {
+        /*  */
         /* 通知 server 端更新一下 ftb 中英、全半角、标点的状态 */
         SendIMEStatusEventToUIProcessViaNamedPipe(                                                          //
             pIME->GetCompositionProcessorEngine()->GetIMEMode(pIME->_GetThreadMgr(), pIME->_GetClientId()), //
