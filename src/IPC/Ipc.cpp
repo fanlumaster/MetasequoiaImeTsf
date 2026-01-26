@@ -851,20 +851,32 @@ struct FanyImeNamedpipeDataToTsf *ReadDataFromServerViaNamedPipe()
  */
 void SendToAuxNamedpipe(std::wstring pipeData)
 {
-    HANDLE hAuxPipe = CreateFileW(    //
-        FANY_IME_AUX_NAMED_PIPE,      //
-        GENERIC_READ | GENERIC_WRITE, //
-        0,                            //
-        nullptr,                      //
-        OPEN_EXISTING,                //
-        0,                            //
-        nullptr                       //
-    );
+    HANDLE hAuxPipe = INVALID_HANDLE_VALUE;
+
+    // 重试几次，等待 Server 准备好
+    for (int retry = 0; retry < 5; ++retry)
+    {
+        hAuxPipe = CreateFileW(           //
+            FANY_IME_AUX_NAMED_PIPE,      //
+            GENERIC_READ | GENERIC_WRITE, //
+            0,                            //
+            nullptr,                      //
+            OPEN_EXISTING,                //
+            0,                            //
+            nullptr                       //
+        );
+        if (hAuxPipe && hAuxPipe != INVALID_HANDLE_VALUE)
+        {
+            break;
+        }
+        /* 为了解决 Windows Media Player 会在启动时调用两次 kill 并且第二次失败的问题
+         * TODO: 在 msg wnd proc 中去处理打开程序会调用两次 kill 的问题，将其优化成一次
+         */
+        Sleep(20); // 等待 20ms 再重试
+    }
     if (!hAuxPipe || hAuxPipe == INVALID_HANDLE_VALUE)
     {
-#ifdef FANY_DEBUG
-        OutputDebugString(fmt::format(L"SendToAuxNamedpipe: PipeOpenError").c_str());
-#endif
+        OutputDebugString(fmt::format(L"SendToAuxNamedpipe: PipeOpenError: {}", pipeData).c_str());
         return;
     }
     DWORD bytesWritten = 0;
