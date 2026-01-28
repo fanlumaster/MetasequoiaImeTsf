@@ -291,6 +291,7 @@ STDAPI CMetasequoiaIME::ActivateEx(ITfThreadMgr *pThreadMgr, TfClientId tfClient
     Global::msgWndHandle = _msgWndHandle;
 
     /* 连接命名管道 */
+    Global::g_connected = true; // 激活时也需要设置一下
     PostMessage(_msgWndHandle, WM_ConnectNamedpipe, 0, 0);
 
     /* 创建 IPC 线程 */
@@ -663,6 +664,18 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
             pIME->GetCompositionProcessorEngine()->GetDoubleSingleByteMode(pIME->_GetThreadMgr(),
                                                                            pIME->_GetClientId()),                    //
             pIME->GetCompositionProcessorEngine()->GetPunctuationMode(pIME->_GetThreadMgr(), pIME->_GetClientId())); //
+        break;
+    }
+    case WM_UpdateIMEStatus: {
+        SendIMESwitchEventToUIProcessViaNamedPipe((UINT)wParam);
+        break;
+    }
+    case WM_UpdateDoubleSingleByte: {
+        SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe((BOOL)wParam);
+        break;
+    }
+    case WM_UpdatePuncMode: {
+        SendPuncSwitchEventToUIProcessViaNamedPipe((BOOL)wParam);
         break;
     }
     default:

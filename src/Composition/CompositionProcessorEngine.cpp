@@ -4,6 +4,7 @@
 #include "TableDictionaryEngine.h"
 #include "TfInputProcessorProfile.h"
 #include "Globals.h"
+#include "FanyDefines.h"
 #include "Compartment.h"
 #include "LanguageBar.h"
 #include "RegKey.h"
@@ -1417,7 +1418,8 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
                                                  Global::MetasequoiaIMEGuidCompartmentDoubleSingleByte);
         CompartmentDoubleSingleByte._GetCompartmentBOOL(isDoubleSingleByte);
         // 0: halfwidth, 1: fullwidth
-        SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(isDoubleSingleByte ? 1 : 0);
+        // SendDoubleSingleByteSwitchEventToUIProcessViaNamedPipe(isDoubleSingleByte ? 1 : 0);
+        PostMessage(Global::msgWndHandle, WM_UpdateDoubleSingleByte, (WPARAM)(isDoubleSingleByte ? 1 : 0), 0);
         fakeThis->PrivateCompartmentsUpdated(pThreadMgr);
     }
     else if (IsEqualGUID(guidCompartment, Global::MetasequoiaIMEGuidCompartmentPunctuation))
@@ -1426,7 +1428,8 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         CCompartment CompartmentPunctuation(pThreadMgr, fakeThis->_tfClientId,
                                             Global::MetasequoiaIMEGuidCompartmentPunctuation);
         CompartmentPunctuation._GetCompartmentBOOL(isPunctuation);
-        SendPuncSwitchEventToUIProcessViaNamedPipe(isPunctuation ? 1 : 0);
+        // SendPuncSwitchEventToUIProcessViaNamedPipe(isPunctuation ? 1 : 0);
+        PostMessage(Global::msgWndHandle, WM_UpdatePuncMode, (WPARAM)(isPunctuation ? 1 : 0), 0);
         fakeThis->PrivateCompartmentsUpdated(pThreadMgr);
     }
     else if (IsEqualGUID(guidCompartment, GUID_COMPARTMENT_KEYBOARD_INPUTMODE_CONVERSION) ||
@@ -1453,8 +1456,9 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         {
             CompartmentPunctuation._SetCompartmentBOOL(FALSE);
         }
-
-        SendIMESwitchEventToUIProcessViaNamedPipe(isOpen ? 1 : 0);
+        
+        // SendIMESwitchEventToUIProcessViaNamedPipe(isOpen ? 1 : 0);
+        PostMessage(Global::msgWndHandle, WM_UpdateIMEStatus, (WPARAM)(isOpen ? 1 : 0), 0);
 
         fakeThis->KeyboardOpenCompartmentUpdated(pThreadMgr);
     }
