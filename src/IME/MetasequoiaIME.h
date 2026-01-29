@@ -18,6 +18,7 @@ const DWORD WM_ThreadFocus = WM_USER + 5;
 const DWORD WM_UpdateIMEStatus = WM_USER + 6;
 const DWORD WM_UpdateDoubleSingleByte = WM_USER + 7;
 const DWORD WM_UpdatePuncMode = WM_USER + 8;
+const DWORD WM_CommitCandidate = WM_USER + 9;
 LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND wndHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 class CMetasequoiaIME : public ITfTextInputProcessorEx,

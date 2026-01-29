@@ -506,7 +506,11 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                 break;
             }
 
-            if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
+            if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::CommitCurCandidate)
+            {
+                PostMessage(pIME->_msgWndHandle, WM_CommitCandidate, 0, 0);
+            }
+            else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
             {
                 PostMessage(                                               //
                     pIME->_msgWndHandle,                                   //
@@ -676,6 +680,24 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
     }
     case WM_UpdatePuncMode: {
         SendPuncSwitchEventToUIProcessViaNamedPipe((BOOL)wParam);
+        break;
+    }
+    case WM_CommitCandidate: {
+        ITfDocumentMgr *pDocMgrFocus = nullptr;
+        ITfContext *pContext = nullptr;
+
+        if (SUCCEEDED(pIME->_GetThreadMgr()->GetFocus(&pDocMgrFocus)) && pDocMgrFocus)
+        {
+            if (SUCCEEDED(pDocMgrFocus->GetTop(&pContext)) && pContext)
+            {
+                _KEYSTROKE_STATE KeystrokeState;
+                KeystrokeState.Category = CATEGORY_CANDIDATE;
+                KeystrokeState.Function = FUNCTION_FINALIZE_CANDIDATELIST;
+                pIME->_InvokeKeyHandler(pContext, 0, 0, 0, KeystrokeState);
+                pContext->Release();
+            }
+            pDocMgrFocus->Release();
+        }
         break;
     }
     default:

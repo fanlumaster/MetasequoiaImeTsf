@@ -182,6 +182,7 @@ constexpr UINT SwitchToPuncEn = 2;
 constexpr UINT SwitchToPuncCn = 3;
 constexpr UINT SwitchToFullwidth = 4;
 constexpr UINT SwitchToHalfwidth = 5;
+constexpr UINT CommitCurCandidate = 6;
 } // namespace DataToTsfWorkerThreadMsgType
 
 inline HANDLE hToTsfWorkerThreadPipe = nullptr;
