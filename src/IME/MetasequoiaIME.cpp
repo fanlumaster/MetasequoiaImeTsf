@@ -384,7 +384,30 @@ STDAPI CMetasequoiaIME::Deactivate()
 {
     // 注销此输入法时，向 server 端发送一个注销的消息
     // 注销不要给消息窗口发送消息，而是直接在这里处理
-    SendIMEDeactivationEventToUIProcessViaNamedPipe();
+    // SendIMEDeactivationEventToUIProcessViaNamedPipe();
+
+    ITfInputProcessorProfileMgr *pProfileMgr = nullptr;
+    TF_INPUTPROCESSORPROFILE profile = {};
+    HRESULT hrProfile = CoCreateInstance( //
+        CLSID_TF_InputProcessorProfiles,  //
+        nullptr,                          //
+        CLSCTX_INPROC_SERVER,             //
+        IID_ITfInputProcessorProfileMgr,  //
+        (void **)&pProfileMgr);
+
+    if (SUCCEEDED(hrProfile) && pProfileMgr != nullptr)
+    {
+        hrProfile = pProfileMgr->GetActiveProfile(GUID_TFCAT_TIP_KEYBOARD, &profile);
+        if (SUCCEEDED(hrProfile) && !IsEqualCLSID(profile.clsid, Global::MetasequoiaIMECLSID))
+        {
+            // 向 server 端发送一个输入法真的切换到了别的输入法的消息
+            // 只有接收到这个消息，才可以隐藏 ftb
+            OutputDebugString(fmt::format(L"Truely deactivate IME and switch to another.\n").c_str());
+            SendIMEDeactivationEventToUIProcessViaNamedPipe();
+        }
+
+        pProfileMgr->Release();
+    }
 
     /* 清理 IPC 线程 */
     _shouldStopIpcThread = true;
