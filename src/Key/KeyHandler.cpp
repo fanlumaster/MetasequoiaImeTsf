@@ -142,9 +142,9 @@ HRESULT CMetasequoiaIME::_HandleToogleIMEMode(TfEditCookie ec, _In_ ITfContext *
     g_toggleImeFallbackBuffer.clear();
 
     // _DeleteCandidateList(FALSE, pContext);
-    _TerminateComposition(ec, pContext);
+    // _TerminateComposition(ec, pContext);
 
-    // _HandleComplete(ec, pContext);
+    _HandleComplete(ec, pContext);
 
     // CCompositionProcessorEngine *pCompositionProcessorEngine;
     // pCompositionProcessorEngine = _pCompositionProcessorEngine;
