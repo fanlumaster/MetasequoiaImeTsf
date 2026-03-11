@@ -72,13 +72,13 @@ sudo regsvr32 /u .\MetasequoiaImeTsf.dll
 
 ## Screenshots
 
-![](https://i.postimg.cc/c402J3KR/image.png)
+![](https://i.imgur.com/hYPpwK4.png)
 
-![](https://i.postimg.cc/v8Bpx6Gf/image.png)
+![](https://i.imgur.com/1Tzd7zn.png)
 
-![](https://i.postimg.cc/ssBgtM5M/image.png)
+![](https://i.imgur.com/SsLCCCX.png)
 
-![](https://i.postimg.cc/ryDqXH0B/image.png)
+![](https://i.imgur.com/jwnWQLI.png)
 
 ![](https://i.postimg.cc/2m9WJTgR/image.png)
 
