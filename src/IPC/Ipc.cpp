@@ -470,7 +470,9 @@ void SendToNamedpipe()
         // Global::hToTsfWorkerThreadPipe = INVALID_HANDLE_VALUE;
         /* 向 Server 端发送 kill 同时重置两个管道的 connect */
         SendToAuxNamedpipe(L"kill");
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually01.").c_str());
+#endif
         // }
 
         //
@@ -497,8 +499,10 @@ void SendToNamedpipe()
 
         if (hPipe == INVALID_HANDLE_VALUE)
         {
-            // TODO: Log
+// TODO: Log
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually02.").c_str());
+#endif
             return;
         }
         else
@@ -517,8 +521,10 @@ void SendToNamedpipe()
 
         if (!ret || bytesWritten != sizeof(namedpipeData))
         {
-            // TODO: Error handling
+// TODO: Error handling
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: SendToNamedpipe failed eventually03.").c_str());
+#endif
         }
 
         return;
@@ -755,7 +761,9 @@ void SendToAuxNamedpipe(std::wstring pipeData)
     }
     if (!hAuxPipe || hAuxPipe == INVALID_HANDLE_VALUE)
     {
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: SendToAuxNamedpipe: PipeOpenError: {}", pipeData).c_str());
+#endif
         return;
     }
     DWORD bytesWritten = 0;

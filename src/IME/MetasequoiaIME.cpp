@@ -412,9 +412,11 @@ STDAPI CMetasequoiaIME::Deactivate()
         hrProfile = pProfileMgr->GetActiveProfile(GUID_TFCAT_TIP_KEYBOARD, &profile);
         if (SUCCEEDED(hrProfile) && !IsEqualCLSID(profile.clsid, Global::MetasequoiaIMECLSID))
         {
-            // 向 server 端发送一个输入法真的切换到了别的输入法的消息
-            // 只有接收到这个消息，才可以隐藏 ftb
+// 向 server 端发送一个输入法真的切换到了别的输入法的消息
+// 只有接收到这个消息，才可以隐藏 ftb
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Truely deactivate IME and switch to another.").c_str());
+#endif
             SendIMEDeactivationEventToUIProcessViaNamedPipe();
         }
 
@@ -556,7 +558,9 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     WM_CheckGlobalCompartment,                             //
                     Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish, //
                     0);
+#ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Switch to English").c_str());
+#endif
             }
             else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToChinese)
             {
@@ -565,7 +569,9 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     WM_CheckGlobalCompartment,                             //
                     Global::DataToTsfWorkerThreadMsgType::SwitchToChinese, //
                     0);
+#ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Switch to Chinese").c_str());
+#endif
             }
             else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncEn)
             {
@@ -574,7 +580,9 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     WM_CheckGlobalCompartment,                            //
                     Global::DataToTsfWorkerThreadMsgType::SwitchToPuncEn, //
                     0);
+#ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Switch to Punc En").c_str());
+#endif
             }
             else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncCn)
             {
@@ -583,7 +591,9 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     WM_CheckGlobalCompartment,                            //
                     Global::DataToTsfWorkerThreadMsgType::SwitchToPuncCn, //
                     0);
+#ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Switch to Punc Cn").c_str());
+#endif
             }
             else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToFullwidth)
             {
@@ -592,7 +602,9 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     WM_CheckGlobalCompartment,                               //
                     Global::DataToTsfWorkerThreadMsgType::SwitchToFullwidth, //
                     0);
+#ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Switch to Fullwidth").c_str());
+#endif
             }
             else if (buf.msg_type == Global::DataToTsfWorkerThreadMsgType::SwitchToHalfwidth)
             {
@@ -601,7 +613,9 @@ void CMetasequoiaIME::IpcWorkerThread(CMetasequoiaIME *pIME)
                     WM_CheckGlobalCompartment,                               //
                     Global::DataToTsfWorkerThreadMsgType::SwitchToHalfwidth, //
                     0);
+#ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Switch to Halfwidth").c_str());
+#endif
             }
         }
         Sleep(100);
@@ -626,43 +640,59 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
     case WM_CheckGlobalCompartment: {
         if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToEnglish)
         {
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Wnd Switch to English").c_str());
+#endif
             pIME->GetCompositionProcessorEngine()->SetIMEMode(pIME->_GetThreadMgr(), pIME->_GetClientId(), FALSE);
         }
         else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToChinese)
         {
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Wnd Switch to Chinese").c_str());
+#endif
             pIME->GetCompositionProcessorEngine()->SetIMEMode(pIME->_GetThreadMgr(), pIME->_GetClientId(), TRUE);
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Switch to Chinese").c_str());
+#endif
         }
         else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncEn)
         {
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Wnd Switch to Punc En").c_str());
+#endif
             pIME->GetCompositionProcessorEngine()->SetPunctuationMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
                                                                       FALSE);
         }
         else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToPuncCn)
         {
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Wnd Switch to Punc Cn").c_str());
+#endif
             pIME->GetCompositionProcessorEngine()->SetPunctuationMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
                                                                       TRUE);
         }
         else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToFullwidth)
         {
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Wnd Switch to Fullwidth").c_str());
+#endif
             pIME->GetCompositionProcessorEngine()->SetDoubleSingleByteMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
                                                                            TRUE);
         }
         else if (wParam == Global::DataToTsfWorkerThreadMsgType::SwitchToHalfwidth)
         {
+#ifdef FANY_DEBUG
             OutputDebugString(fmt::format(L"[msime]: Wnd Switch to Halfwidth").c_str());
+#endif
             pIME->GetCompositionProcessorEngine()->SetDoubleSingleByteMode(pIME->_GetThreadMgr(), pIME->_GetClientId(),
                                                                            FALSE);
         }
         break;
     }
     case WM_ConnectNamedpipe: {
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: Try to connect named pipe via WM_ConnectNamedpipe").c_str());
+#endif
         KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
         g_connectAllNamedpipeRetryCount = 0;
         SendToAuxNamedpipe(L"kill");
@@ -671,7 +701,9 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         break;
     }
     case WM_DisconnectNamedpipe: {
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: WM_DisconnectNamedpipe.").c_str());
+#endif
         KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
         KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
         g_connectAllNamedpipeRetryCount = 0;
@@ -680,7 +712,9 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
         break;
     }
     case WM_ConnectToTsfNamedpipe: {
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: Try to Connect to TSF named pipe").c_str());
+#endif
         KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);
         g_connectToTsfNamedpipeRetryCount = 0;
         // Keep old behavior: wait once before first connect try, but do it asynchronously.
@@ -698,13 +732,17 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
                 break;
             }
 
+#ifdef FANY_DEBUG
             OutputDebugString(
                 fmt::format(L"[msime]: Retry connect all named pipes: {}", g_connectAllNamedpipeRetryCount).c_str());
+#endif
             if (ConnectToAllNamedpipe())
             {
                 KillTimer(hWnd, TIMER_CONNECT_ALL_NAMEDPIPE);
                 g_connectAllNamedpipeRetryCount = 0;
+#ifdef FANY_DEBUG
                 OutputDebugString(fmt::format(L"[msime]: Yes Connected to named pipe :)").c_str());
+#endif
                 break;
             }
 
@@ -719,9 +757,11 @@ LRESULT CALLBACK CMetasequoiaIME_WindowProc(HWND hWnd, UINT message, WPARAM wPar
 
         if (wParam == TIMER_CONNECT_TO_TSF_NAMEDPIPE)
         {
+#ifdef FANY_DEBUG
             OutputDebugString(
                 fmt::format(L"[msime]: Retry connect to tsf named pipe: {}", g_connectToTsfNamedpipeRetryCount)
                     .c_str());
+#endif
             if (ConnectToTsfNamedpipe())
             {
                 KillTimer(hWnd, TIMER_CONNECT_TO_TSF_NAMEDPIPE);

@@ -375,9 +375,12 @@ STDAPI CLangBarItemButton::OnClick(TfLBIClick click, POINT pt, _In_ const RECT *
     if (click == TF_LBI_CLK_RIGHT)
     {
 #ifdef FANY_DEBUG
-        OutputDebugString(
-            fmt::format(L"[msime]: \nprcArea: ({}, {}, {}, {})", prcArea->left, prcArea->top, prcArea->right, prcArea->bottom)
-                .c_str());
+        OutputDebugString(fmt::format(L"[msime]: \nprcArea: ({}, {}, {}, {})", //
+                                      prcArea->left,                           //
+                                      prcArea->top,                            //
+                                      prcArea->right,                          //
+                                      prcArea->bottom)
+                              .c_str());
         OutputDebugString(L"[msime]: right click of lang bar item");
 #endif
         SendLangbarRightClickEventToUIProcess(prcArea);

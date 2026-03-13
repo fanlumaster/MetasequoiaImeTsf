@@ -130,8 +130,7 @@ HRESULT CMetasequoiaIME::_HandleCandidateFinalize(TfEditCookie ec, _In_ ITfConte
             }
 #ifdef FANY_DEBUG
             OutputDebugString(
-                fmt::format(L"[msime]: create_word: current word part {}", GlobalIme::word_for_creating_word)
-                    .c_str());
+                fmt::format(L"[msime]: create_word: current word part {}", GlobalIme::word_for_creating_word).c_str());
 #endif
             return hr;
         }

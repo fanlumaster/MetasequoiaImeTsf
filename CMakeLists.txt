@@ -13,9 +13,9 @@ add_definitions(
 # For utf8cpp, make it use C++11 and later
 add_compile_options(/Zc:__cplusplus)
 
-# add_definitions(
-#     /DFANY_DEBUG=1
-# )
+add_definitions(
+    /DFANY_DEBUG=1
+)
 
 # fmt
 find_package(fmt CONFIG REQUIRED)

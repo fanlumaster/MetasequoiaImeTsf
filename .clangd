@@ -4,7 +4,7 @@ CompileFlags:
       # Macros
       -DUNICODE,
       -D_UNICODE,
-      # -DFANY_DEBUG,
+      -DFANY_DEBUG,
       # Project src include paths
       "-IC:/Users/sonnycalcr/EDisk/CppCodes/IMECodes/MetasequoiaImeTsf/src",
       "-IC:/Users/sonnycalcr/EDisk/CppCodes/IMECodes/MetasequoiaImeTsf/src/Candidate",

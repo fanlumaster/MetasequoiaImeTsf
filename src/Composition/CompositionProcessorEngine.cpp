@@ -1452,7 +1452,7 @@ HRESULT CCompositionProcessorEngine::CompartmentCallback(_In_ void *pv, REFGUID 
         {
             CompartmentPunctuation._SetCompartmentBOOL(FALSE);
         }
-        
+
         // SendIMESwitchEventToUIProcessViaNamedPipe(isOpen ? 1 : 0);
         PostMessage(Global::msgWndHandle, WM_UpdateIMEStatus, (WPARAM)(isOpen ? 1 : 0), 0);
 

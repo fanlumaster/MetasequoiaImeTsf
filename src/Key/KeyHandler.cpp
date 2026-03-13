@@ -124,7 +124,9 @@ HRESULT CMetasequoiaIME::_HandleToogleIMEMode(TfEditCookie ec, _In_ ITfContext *
         commitString.assign(keyStrokebuffer.Get(), keyStrokebuffer.GetLength());
         CStringRange commitStringRange;
         commitStringRange.Set(commitString.c_str(), commitString.length());
+#ifdef FANY_DEBUG
         OutputDebugString(fmt::format(L"[msime]: commitString: {}", commitString).c_str());
+#endif
 
         HRESULT hr = _AddCharAndFinalize(ec, pContext, &commitStringRange);
         if (FAILED(hr))
