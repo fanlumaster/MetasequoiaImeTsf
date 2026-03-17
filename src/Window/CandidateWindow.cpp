@@ -11,6 +11,7 @@
 #include "CandidateWindow.h"
 #include "CompositionProcessorEngine.h"
 #include "FanyUtils.h"
+#include <fmt/xchar.h>
 
 #pragma comment(lib, "dwmapi.lib")
 
