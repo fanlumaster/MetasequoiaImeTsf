@@ -3,7 +3,9 @@ out/
 build/
 Release/
 build64/
+build64-release/
 build32/
+build32-release/
 draft/
 *.log
 CMakeSettings.json
